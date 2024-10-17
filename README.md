@@ -1,44 +1,44 @@
-# Thales Open Source Template Project
+# LUNA SAMPLES
 
-Template for creating a new project in the [Thales GitHub organization](https://github.com/ThalesGroup).
+This repository contains various sample codes designed to work across all variants of [Luna General Purpose HSMs](https://cpl.thalesgroup.com/encryption/hardware-security-modules/general-purpose-hsms), unless otherwise noted in the comments. These variants includes
+- [Luna Network HSM 7](https://cpl.thalesgroup.com/sites/default/files/content/product_briefs/luna-sa-network-attached-hsm-pb.pdf).
+- [Luna PCIe HSM 7](https://cpl.thalesgroup.com/sites/default/files/content/product_briefs/field_document/2024-04/Thales-Luna-PCIe-HSM-pb.pdf).
+- [Luna USB HSM (Luna U700)](https://cpl.thalesgroup.com/sites/default/files/content/product_briefs/field_document/2022-09/luna-usb-hsm-pb.pdf).
+- [Luna Cloud HSM a.k.a Data Protection on Demand(DPoD)](https://cpl.thalesgroup.com/sites/default/files/content/solution_briefs/data-protection-on-demand-services-sb.pdf).
+- Luna G5 (EOL - Sep-2025).
+- Previous Generation of Luna HSM.
 
-Each Thales OSS project repository **MUST** contain the following files at the root:
+<br><br>
 
-- a `LICENSE` which has been chosen in accordance with legal department depending on your needs
+Features -
 
-- a `README.md` outlining the project goals, sponsoring sig, and community contact information, [GitHub tips about README.md](https://docs.github.com/en/github/creating-cloning-and-archiving-repositories/about-readmes)
++ **Universal Compatibility**: The sample codes are compatible with all Luna HSM variants unless explicitly mentioned.
 
-- a `CONTRIBUTING.md` outlining how to contribute to the project, how to submit a pull request and an issue
++ **Well-Documented**: Each sample code is thoroughly commented to explain its purpose and functionality.
 
-- a `SECURITY.md` outlining how the security concerns are handled, [GitHub tips about SECURITY.md](https://docs.github.com/en/github/managing-security-vulnerabilities/adding-a-security-policy-to-your-repository)
++ **Tested**:  All samples have been tested and should work under the right conditions. Some samples may require specific policies to be enabled.
 
-Below is an example of the common structure and information expected in a README.
++ **Well-Formatted**: Samples are well-formatted, easy to read, properly indented, and free from unnecessary comments and other extraneous material.
 
-**Please keep this structure as is and only fill the content for each section according to your project.**
++ **Topics Covered**: The samples in this repository would cover the following topics
+        - PKCS#11.
++ **Languages Covered**: Samples available for C.
 
-If you need assistance or have question, please contact oss@thalesgroup.com
+<br><br>
 
-## Get started
+## Content
 
-XXX project purpose it to ...
+| Directory Name  | Description   |
+| --- | --- |
+| C_Samples | Contains samples written in C language. |
 
-**Please also add the description into the About section (Description field)**
-
-## Documentation
-
-Documentation is available at [xxx/docs](https://xxx/docs/).
-
-You can use [GitHub pages](https://guides.github.com/features/pages/) to create your documentation.
-
-See an example here : https://github.com/ThalesGroup/ThalesGroup.github.io
-
-**Please also add the documentation URL into the About section (Website field)**
+<br><br>
 
 ## Contributing
 
-If you are interested in contributing to the XXX project, start by reading the [Contributing guide](/CONTRIBUTING.md).
+If you are interested in contributing to the "LunaHSM_Sample_Codes", start by reading the [Contributing guide](/CONTRIBUTING.md).
+
 
 ## License
 
-The chosen license in accordance with legal department must be defined into an explicit [LICENSE](https://github.com/ThalesGroup/template-project/blob/master/LICENSE) file at the root of the repository
-You can also link this file in this README section.
+This software is provided under a [permissive license](LICENSE).
