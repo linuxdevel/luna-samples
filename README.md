@@ -1,4 +1,4 @@
-# LUNA SAMPLES
+# [ LUNA SAMPLES ]
 
 This repository contains various sample codes designed to work across all variants of [Luna General Purpose HSMs](https://cpl.thalesgroup.com/encryption/hardware-security-modules/general-purpose-hsms), unless otherwise noted in the comments. These variants includes
 - [Luna Network HSM 7](https://cpl.thalesgroup.com/sites/default/files/content/product_briefs/luna-sa-network-attached-hsm-pb.pdf).
@@ -20,9 +20,10 @@ Features -
 
 + **Well-Formatted**: Samples are well-formatted, easy to read, properly indented, and free from unnecessary comments and other extraneous material.
 
-+ **Topics Covered**: The samples in this repository would cover the following topics
-        - PKCS#11.
-+ **Languages Covered**: Samples available for C.
++ **Topics Covered**: The samples in this repository would cover the following topics:
+	- PKCS#11.
+	- Luna JSP.
++ **Languages Covered**: Samples available for C, Java.
 
 <br><br>
 
@@ -31,6 +32,7 @@ Features -
 | Directory Name  | Description   |
 | --- | --- |
 | C_Samples | Contains samples written in C language. |
+| LunaJSP_Samples | Contains Java based samples that uses LunaProvider (Luna JSP). |
 
 <br><br>
 
