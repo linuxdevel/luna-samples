@@ -9,7 +9,7 @@
 | encryption | samples to demonstrate how to perform encryption | 8 |
 | object_management | samples to demonstrate how to manage keys | 10 |
 | sfnt_extension | these are samples demonstrating various SafeNet function (Vendor Defined Functions). | 3 |
-| misc | Samples demonstrating various miscellaneous tasks. | 7 |
+| misc | Samples demonstrating various miscellaneous tasks. | 8 |
 
 Connect_and_Disconnect.c : is a sample that shows how to connect to a Luna HSM and disconnect from it.
 

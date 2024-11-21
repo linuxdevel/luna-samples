@@ -196,6 +196,9 @@ Usage_Limit_demo: misc/Usage_Limit_demo.c
 MultiThread_Signing_demo: misc/MultiThread_Signing_demo.c
 	@mkdir -p bin/misc
 	@$(CC) -DOS_UNIX ${LINKFLAGS} -I$(INCLUDES) -o bin/misc/MultiThread_Signing_demo misc/MultiThread_Signing_demo.c
+List_Available_Slots: misc/List_Available_Slots.c
+	@mkdir -p bin/misc
+	@$(CC) -DOS_UNIX ${LINKFLAGS} -I$(INCLUDES) -o bin/misc/List_Available_Slots misc/List_Available_Slots.c
 
 
 
@@ -251,7 +254,7 @@ UnwrapTemplates_demo
 # Compile and build all miscellaneous samples.
 misc: C_GenerateRandom_demo C_GetMechanismList_Demo C_SeedRandom_demo \
 Crypto_User_Login C_GetMechanismInfo_demo Usage_Limit_demo \
-MultiThread_Signing_demo
+MultiThread_Signing_demo List_Available_Slots
 	@echo " - Miscellaneous samples have build successfully. Executables are inside bin/misc directory."
 
 
@@ -323,6 +326,7 @@ list_samples:
 	@echo "- C_GetMechanismInfo_demo"
 	@echo "- Usage_Limit_demo"
 	@echo "- MultiThread_Signing_demo"
+	@echo "- List_Available_Slots"
 	@echo
 	@echo "[ SAFENET EXTENSION SAMPLES ]"
 	@echo "- Show_Partition_Policies"
