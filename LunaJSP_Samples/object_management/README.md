@@ -15,3 +15,5 @@
 | GenerateECDSAKeyPair.java | Generates ecdsa keypair using LunaProvider.|
 | PersistECDSAKeyPairUsingKeyStore.java | Generates ECDSA keypair and persist it as a PrivateKeyEntry. |
 | PersistECDSAKeyPairUsingLunaKey.java | Generates ECDSA keypair and persist it using LunaKey. |
+| WrapUnwrapSecretKeyUsing_DES3_CBC_PAD | Demonstrates how to wrap/unwrap a secret key using CKM_DES3_CBC_PAD mechanism. |
+| WrapUnwrapSecretKeyUsing_AES_CBC_PAD.java | Demonstrates how to wrap/unwrap a secret key using CKM_AES_CBC_PAD mechanism. |
