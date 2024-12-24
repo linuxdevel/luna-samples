@@ -48,10 +48,17 @@ public class SignUsing_ECDSA {
 		System.out.println("java SignUsing_ECDSA myPartition userpin\n");
 	}
 
-	// Adds LunaProvider into java security provider List dynamically.
-	private static void addLunaProvider() {
-		Security.insertProviderAt(new com.safenetinc.luna.provider.LunaProvider(), 3);
-	}
+
+        // Add LunaProvider to security provider list.
+        private static void addLunaProvider() {
+                if(Security.getProvider(PROVIDER)==null) {
+                        Security.insertProviderAt(new com.safenetinc.luna.provider.LunaProvider(), 3);
+                        System.out.println("LunaProvider added to java.security");
+                } else {
+                        System.out.println("LunaProvider found in java.security");
+                }
+        }
+
 
 	// generates ECDSA keypair.
 	private static void generateKeyPair() throws Exception {
@@ -62,12 +69,14 @@ public class SignUsing_ECDSA {
 		System.out.println("ECDSA:"+CURVE+" keypair generated.");
 	}
 
+
 	// computer sha-256 hash of PLAINTEXT.
 	private static void computeHash() throws Exception {
 		MessageDigest digest = MessageDigest.getInstance("SHA256");
 		digest.update(PLAINTEXT.getBytes());
 		hash = digest.digest();
 	}
+
 
 	// signs the plaintext using CKM_ECDSA mechanism.
 	private static void signData() throws Exception {
@@ -77,6 +86,7 @@ public class SignUsing_ECDSA {
 		signature = sign.sign();
 		System.out.println("Plaintext signed.");
 	}
+
 
 	// verifies the signature.
 	private static void verifyData() throws Exception {

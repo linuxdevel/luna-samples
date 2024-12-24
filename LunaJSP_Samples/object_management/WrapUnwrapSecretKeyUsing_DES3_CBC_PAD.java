@@ -11,7 +11,7 @@
 
         OBJECTIVE :
 	- This sample demonstrates how wrap and then unwrap a secret key using CKM_DES3_CBC_PAD mechanism.
-	- This sample would generate a DES-3 key and an AES-128 key.
+	- This sample generates a DES-3 key and an AES-128 key.
 		o AES-128 key is the key to be wrapped and unwrapped.
 		o DES-3 key is the wrapping key.
 	- All keys are generated and unwrapped as a session key by this sample.
@@ -41,6 +41,7 @@ public class WrapUnwrapSecretKeyUsing_DES3_CBC_PAD {
 	private static final IvParameterSpec IVSPEC = new IvParameterSpec("12345678".getBytes());
 	private static final String PROVIDER = "LunaProvider";
 
+
 	// Prints the proper syntax to execute this sample.
 	private static void printUsage() {
 		System.out.println(" [ WrapUnwrapSecretKeyUsing_DES3_CBC_PAD ]\n");
@@ -50,10 +51,17 @@ public class WrapUnwrapSecretKeyUsing_DES3_CBC_PAD {
 		System.out.println("java WrapUnwrapSecretKeyUsing_DES3_CBC_PAD myPartition userpin\n");
 	}
 
-        // Adds LunaProvider into java security provider List dynamically.
+
+        // Add LunaProvider to security provider list.
         private static void addLunaProvider() {
-                Security.insertProviderAt(new com.safenetinc.luna.provider.LunaProvider(), 3);
+                if(Security.getProvider(PROVIDER)==null) {
+                        Security.insertProviderAt(new com.safenetinc.luna.provider.LunaProvider(), 3);
+                        System.out.println("LunaProvider added to java.security");
+                } else {
+                        System.out.println("LunaProvider found in java.security");
+                }
         }
+
 
         // generates aes-128 key.
         private static void generateAESKey() throws Exception {
@@ -66,6 +74,7 @@ public class WrapUnwrapSecretKeyUsing_DES3_CBC_PAD {
                 }
         }
 
+
         // generates des-3 key.
         private static void generateDES3Key() throws Exception {
                 KeyGenerator keyGen = KeyGenerator.getInstance("DES3", PROVIDER);
@@ -75,6 +84,7 @@ public class WrapUnwrapSecretKeyUsing_DES3_CBC_PAD {
                 }
         }
 
+
 	// wraps aes-key using des3 key.
 	private static void wrapKey() throws Exception {
 		Cipher wrap = Cipher.getInstance("DESede/CBC/PKCS5Padding", PROVIDER);
@@ -82,6 +92,7 @@ public class WrapUnwrapSecretKeyUsing_DES3_CBC_PAD {
 		wrappedKey = wrap.wrap(toBeWrapped);
 		System.out.println("AES key wrapped.");
 	}
+
 
 	// unwraps the wrapped aes-key
 	private static void unwrapKey() throws Exception {

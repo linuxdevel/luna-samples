@@ -10,15 +10,17 @@
         **********************************************************************************
 
         OBJECTIVE :
-	- This sample demonstrates how wrap and then unwrap a secret key using CKM_AES_CBC_PAD mechanism.
-	- It generates two AES-256 key. One for wrapping and the other to be wrapped.
+	- This sample demonstrates how wrap and unwrap a private key using CKM_AES_KWP mechanism.
+	- It generates an AES-256 key for wrapping/unwrapping an RSA Private Key.
 	- All keys are generated and unwrapped as a session key by this sample.
-	- This sample may fail when executed on a slot configured to operate in FIPS mode.
+	- This sample requires a Luna HSM, configured as KeyExport.
 */
 
 
 
 import java.security.Security;
+import java.security.PrivateKey;
+import java.security.KeyPairGenerator;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.Cipher;
@@ -26,27 +28,28 @@ import javax.crypto.spec.IvParameterSpec;
 import com.safenetinc.luna.LunaSlotManager;
 import com.safenetinc.luna.exception.*;
 
-public class WrapUnwrapSecretKeyUsing_AES_CBC_PAD {
+public class WrapUnwrapSecretKeyUsing_AES_KW {
 
 	private static String slotPassword = null;
 	private static String slotLabel = null;
 	private static LunaSlotManager slotManager = null;
 	private static SecretKey wrappingKey = null; // for storing wrapping key.
-	private static SecretKey toBeWrapped = null; // for storing the key to be wrapped.
-	private static SecretKey unwrappedKey = null;// for storing unwrapped key.
-	private static byte[] wrappedKey = null; // for storing encrypted key bytes.
-	private static final int KEY_SIZE = 128;
-	private static final IvParameterSpec IVSPEC = new IvParameterSpec("1234567812345678".getBytes());
+	private static PrivateKey rsaPrivateKey = null;
+	private static PrivateKey unwrappedPrivateKey = null;// for storing unwrapped key.
+	private static byte[] wrappedPrivateKey = null; // for storing encrypted key bytes.
+	private static final int AES_KEY_SIZE = 128;
+	private static final int RSA_KEY_SIZE = 2048;
+	private static final IvParameterSpec IVSPEC = new IvParameterSpec("1234".getBytes());
 	private static final String PROVIDER = "LunaProvider";
 
 
 	// Prints the proper syntax to execute this sample.
 	private static void printUsage() {
-		System.out.println(" [ WrapUnwrapSecretKeyUsing_AES_CBC_PAD ]\n");
+		System.out.println(" [ WrapUnwrapSecretKeyUsing_AES_KW ]\n");
 		System.out.println("Usage-");
-		System.out.println("java WrapUnwrapSecretKeyUsing_AES_CBC_PAD <slot_label> <crypto_officer_password>\n");
+		System.out.println("java WrapUnwrapSecretKeyUsing_AES_KW <slot_label> <crypto_officer_password>\n");
 		System.out.println("Example -");
-		System.out.println("java WrapUnwrapSecretKeyUsing_AES_CBC_PAD myPartition userpin\n");
+		System.out.println("java WrapUnwrapSecretKeyUsing_AES_KW myPartition userpin\n");
 	}
 
 
@@ -62,34 +65,39 @@ public class WrapUnwrapSecretKeyUsing_AES_CBC_PAD {
 
 
         // generates AES-256 key.
-        private static SecretKey generateAESKey() throws Exception {
-		SecretKey key;
-		slotManager.setSecretKeysExtractable(true); // Sets CKA_EXTRACTABLE as TRUE, else C_Wrap would fail.
+        private static void generateAESKey() throws Exception {
                 KeyGenerator keyGen = KeyGenerator.getInstance("AES", PROVIDER);
-                keyGen.init(KEY_SIZE);
-                key = keyGen.generateKey();
-                if(key==null) {
-                        System.exit(1);
-                }
-		return key;
+                keyGen.init(AES_KEY_SIZE);
+                wrappingKey = keyGen.generateKey();
+		System.out.println("AES key generated for wrapping.");
         }
 
 
-	// wraps aes-key using des3 key.
-	private static void wrapKey() throws Exception {
-		Cipher wrap = Cipher.getInstance("AES/CBC/PKCS5Padding", PROVIDER);
-		wrap.init(Cipher.WRAP_MODE, wrappingKey, IVSPEC);
-		wrappedKey = wrap.wrap(toBeWrapped);
-		System.out.println("AES key wrapped.");
+	// generates RSA-2048 keypair.
+	private static void generateRSAPrivateKey() throws Exception {
+		slotManager.setPrivateKeysExtractable(true); // sets private key as extractable, i.e. CKA_EXTRACTABLE=TRUE
+		KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance("RSA", PROVIDER);
+		keyPairGen.initialize(RSA_KEY_SIZE);
+		rsaPrivateKey = keyPairGen.generateKeyPair().getPrivate();
+		System.out.println("RSA keypair generated.");
 	}
 
 
-	// unwraps the wrapped aes-key
+	// wraps private key.
+	private static void wrapKey() throws Exception {
+		Cipher wrap = Cipher.getInstance("AES/KWP/NoPadding", PROVIDER);
+		wrap.init(Cipher.WRAP_MODE, wrappingKey, IVSPEC);
+		wrappedPrivateKey = wrap.wrap(rsaPrivateKey);
+		System.out.println("RSA private key wrapped.");
+	}
+
+
+	// unwraps a wrapped private key
 	private static void unwrapKey() throws Exception {
-		Cipher unwrap = Cipher.getInstance("AES/CBC/PKCS5Padding", PROVIDER);
+		Cipher unwrap = Cipher.getInstance("AES/KWP/NoPadding", PROVIDER);
 		unwrap.init(Cipher.UNWRAP_MODE, wrappingKey, IVSPEC);
-		unwrappedKey = (SecretKey)unwrap.unwrap(wrappedKey, "AES", Cipher.SECRET_KEY);
-		System.out.println("Wrapped key unwrapped.");
+		unwrappedPrivateKey = (PrivateKey)unwrap.unwrap(wrappedPrivateKey, "RSA", Cipher.PRIVATE_KEY);
+		System.out.println("Wrapped private key unwrapped.");
 	}
 
 
@@ -101,10 +109,8 @@ public class WrapUnwrapSecretKeyUsing_AES_CBC_PAD {
 			addLunaProvider();
 			slotManager.login(slotLabel, slotPassword); // Performs C_Login
 			System.out.println("LOGIN: SUCCESS");
-			wrappingKey = generateAESKey();
-			System.out.println("AES wrapping key generated.");
-			toBeWrapped = generateAESKey();
-			System.out.println("AES key to be wrapped, generated.");
+			generateAESKey();
+			generateRSAPrivateKey();
 			wrapKey();
 			unwrapKey();
 			slotManager.logout(); // Performs C_Logout

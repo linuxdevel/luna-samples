@@ -10,10 +10,9 @@
         **********************************************************************************
 
         OBJECTIVE :
-	- This sample demonstrates how wrap and then unwrap a secret key using CKM_AES_CBC_PAD mechanism.
-	- It generates two AES-256 key. One for wrapping and the other to be wrapped.
+	- This sample demonstrates how wrap and then unwrap a secret key using CKM_AES_KW mechanism.
+	- This sample generates two AES-256 key. One for wrapping and the other to be wrapped.
 	- All keys are generated and unwrapped as a session key by this sample.
-	- This sample may fail when executed on a slot configured to operate in FIPS mode.
 */
 
 
@@ -26,7 +25,7 @@ import javax.crypto.spec.IvParameterSpec;
 import com.safenetinc.luna.LunaSlotManager;
 import com.safenetinc.luna.exception.*;
 
-public class WrapUnwrapSecretKeyUsing_AES_CBC_PAD {
+public class WrapUnwrapSecretKeyUsing_AES_KW {
 
 	private static String slotPassword = null;
 	private static String slotLabel = null;
@@ -36,17 +35,17 @@ public class WrapUnwrapSecretKeyUsing_AES_CBC_PAD {
 	private static SecretKey unwrappedKey = null;// for storing unwrapped key.
 	private static byte[] wrappedKey = null; // for storing encrypted key bytes.
 	private static final int KEY_SIZE = 128;
-	private static final IvParameterSpec IVSPEC = new IvParameterSpec("1234567812345678".getBytes());
+	private static final IvParameterSpec IVSPEC = new IvParameterSpec("12345678".getBytes());
 	private static final String PROVIDER = "LunaProvider";
 
 
 	// Prints the proper syntax to execute this sample.
 	private static void printUsage() {
-		System.out.println(" [ WrapUnwrapSecretKeyUsing_AES_CBC_PAD ]\n");
+		System.out.println(" [ WrapUnwrapSecretKeyUsing_AES_KW ]\n");
 		System.out.println("Usage-");
-		System.out.println("java WrapUnwrapSecretKeyUsing_AES_CBC_PAD <slot_label> <crypto_officer_password>\n");
+		System.out.println("java WrapUnwrapSecretKeyUsing_AES_KW <slot_label> <crypto_officer_password>\n");
 		System.out.println("Example -");
-		System.out.println("java WrapUnwrapSecretKeyUsing_AES_CBC_PAD myPartition userpin\n");
+		System.out.println("java WrapUnwrapSecretKeyUsing_AES_KW myPartition userpin\n");
 	}
 
 
@@ -75,18 +74,18 @@ public class WrapUnwrapSecretKeyUsing_AES_CBC_PAD {
         }
 
 
-	// wraps aes-key using des3 key.
+	// wraps aes-key.
 	private static void wrapKey() throws Exception {
-		Cipher wrap = Cipher.getInstance("AES/CBC/PKCS5Padding", PROVIDER);
+		Cipher wrap = Cipher.getInstance("AES/KW/NoPadding", PROVIDER);
 		wrap.init(Cipher.WRAP_MODE, wrappingKey, IVSPEC);
 		wrappedKey = wrap.wrap(toBeWrapped);
 		System.out.println("AES key wrapped.");
 	}
 
 
-	// unwraps the wrapped aes-key
+	// unwraps the wrapped key
 	private static void unwrapKey() throws Exception {
-		Cipher unwrap = Cipher.getInstance("AES/CBC/PKCS5Padding", PROVIDER);
+		Cipher unwrap = Cipher.getInstance("AES/KW/NoPadding", PROVIDER);
 		unwrap.init(Cipher.UNWRAP_MODE, wrappingKey, IVSPEC);
 		unwrappedKey = (SecretKey)unwrap.unwrap(wrappedKey, "AES", Cipher.SECRET_KEY);
 		System.out.println("Wrapped key unwrapped.");

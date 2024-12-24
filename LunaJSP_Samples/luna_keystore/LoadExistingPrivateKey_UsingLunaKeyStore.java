@@ -10,27 +10,37 @@
         **********************************************************************************
 
         OBJECTIVE :
-	- This sample demonstrates how to generate an RSA-2048 keypair using LunaProvider and use it to sign data.
-	- Keypair generated using this sample is ephemeral, i.e. a session keypair.
-	- This sample uses CKM_RSA_PKCS mechanism which in java security is known as "RSA".
+	- This sample demonstrates how to retrieve an existing RSA PrivateKeyEntry using a KeyStore.
+	- The sample searches for the PrivateKeyEntry using its key alias.
+	- Once found, the private key is used to sign data using the SHA256withRSA mechanism.
+	- The generated signature is then verified using the corresponding public key.
 
 */
 
 
 import java.security.Security;
+import java.security.KeyStore;
+import java.security.KeyStore.PrivateKeyEntry;
+import java.security.KeyStore.PasswordProtection;
 import java.security.KeyPairGenerator;
 import java.security.KeyPair;
 import java.security.Signature;
+import java.io.ByteArrayInputStream;
 import com.safenetinc.luna.LunaSlotManager;
 import com.safenetinc.luna.exception.*;
+import java.io.IOException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 
-public class  SignUsing_RSA_PKCS {
+public class LoadExistingPrivateKey_UsingLunaKeyStore {
 
 	private static LunaSlotManager slotManager = null;
 	private static String slotPassword = null;
 	private static String slotLabel = null;
-	private static KeyPair rsaKeyPair = null;
-	private static final int KEY_SIZE = 2048;
+	private static String keyAlias = null;
+	private static PrivateKeyEntry signingKey = null;
+	private static KeyStore lunaKeyStore = null;
 	private static final String PROVIDER = "LunaProvider";
 	private static final String PLAINTEXT = "Earth is the third planet of our Solar System.";
 	private static byte[] signature = null;
@@ -38,11 +48,11 @@ public class  SignUsing_RSA_PKCS {
 
 	// Prints the correct syntax to execute this sample.
 	private static void printUsage() {
-		System.out.println("[ SignUsing_RSA_PKCS ]\n");
+		System.out.println("[ LoadExistingPrivateKey_UsingLunaKeyStore ]\n");
 		System.out.println("Usage-");
-		System.out.println("java SignUsing_RSA_PKCS <slot_label> <crypto_officer_password>\n");
+		System.out.println("java LoadExistingPrivateKey_UsingLunaKeyStore <slot_label> <crypto_officer_password> <private_key_entry_alias>\n");
 		System.out.println("Example -");
-		System.out.println("java SignUsing_RSA_PKCS myPartition userpin\n");
+		System.out.println("java LoadExistingPrivateKey_UsingLunaKeyStore myPartition userpin mySigningKey\n");
 	}
 
 
@@ -57,18 +67,29 @@ public class  SignUsing_RSA_PKCS {
         }
 
 
-	// generates rsa-2048 keypair
-	private static void generateKeyPair() throws Exception {
-		KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance("RSA",PROVIDER);
-		keyPairGen.initialize(KEY_SIZE);
-		rsaKeyPair = keyPairGen.generateKeyPair();
-		System.out.println("RSA-2048 keypair generated.");
-	}
+	// loads Luna KeyStore (calls C_Login).
+        private static void loadKeyStore() throws IOException, KeyStoreException, NoSuchAlgorithmException, CertificateException {
+                lunaKeyStore = KeyStore.getInstance("Luna");
+                lunaKeyStore.load(new ByteArrayInputStream(("tokenlabel:"+slotLabel).getBytes()), slotPassword.toCharArray());
+                System.out.println("Luna KeyStore loaded successfully.");
+        }
 
-	// signs the plaintext using CKM_RSA_PKCS mechanism.
+	
+        // loads AES-key.
+        private static void loadSigningKey() throws Exception {
+                signingKey = (PrivateKeyEntry)lunaKeyStore.getEntry(keyAlias, new PasswordProtection("abcd".toCharArray()));
+                if(signingKey == null) {
+                        System.out.println("Signing Key: " + keyAlias + " not found.");
+                        System.exit(1);
+                }
+                System.out.println("Signing key: "+ keyAlias +" found.");
+        }
+
+
+        // Signs the plaintext using CKM_RSA_PKCS mechanism.
 	private static void signData() throws Exception {
-		Signature sign = Signature.getInstance("RSA", PROVIDER);
-		sign.initSign(rsaKeyPair.getPrivate());
+		Signature sign = Signature.getInstance("sha256WithRSA", PROVIDER);
+		sign.initSign(signingKey.getPrivateKey());
 		sign.update(PLAINTEXT.getBytes());
 		signature = sign.sign();
 		System.out.println("Plaintext signed.");
@@ -76,8 +97,8 @@ public class  SignUsing_RSA_PKCS {
 
 	// verifies the signature.
 	private static void verifyData() throws Exception {
-		Signature verify = Signature.getInstance("RSA", PROVIDER);
-		verify.initVerify(rsaKeyPair.getPublic());
+		Signature verify = Signature.getInstance("sha256WithRSA", PROVIDER);
+		verify.initVerify(signingKey.getCertificate().getPublicKey());
 		verify.update(PLAINTEXT.getBytes());
 		if(verify.verify(signature)) {
 			System.out.println("Signature verified.");
@@ -90,23 +111,12 @@ public class  SignUsing_RSA_PKCS {
 		try {
 			slotLabel = args[0];
 			slotPassword = args[1];
-			slotManager = LunaSlotManager.getInstance();
-
-			if(slotManager.findSlotFromLabel(slotLabel)!=-1) { // checks if the slot number is correct.
-				addLunaProvider();
-				slotManager.login(slotLabel, slotPassword); // Performs C_Login
-				System.out.println("LOGIN: SUCCESS");
-				generateKeyPair();
-				signData();
-				verifyData();
-			} else {
-				System.out.println("ERROR: Slot with label " + slotLabel + " not found.");
-				System.exit(1);
-			}
-
-			LunaSlotManager.getInstance().logout(); // Performs C_Logout
-			System.out.println("LOGOUT: SUCCESS");
-
+			keyAlias = args[2];
+			addLunaProvider();
+			loadKeyStore();
+			loadSigningKey();
+			signData();
+			verifyData();
 		} catch(ArrayIndexOutOfBoundsException aioe) {
 			printUsage();
 			System.exit(1);

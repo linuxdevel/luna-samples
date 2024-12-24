@@ -18,3 +18,7 @@
 | SignUsing_SHA256_RSA_PKCS_PSS | Demonstrates how to sign using SHA256-RSA-PSS mechanism. |
 | SignUsing_ECDSA.java | Demonstrates how to sign a hash using ECDSA keypair. |
 | SignUsing_SHA256_ECDSA.java | Demonstrates how to sign using sha256WithECDSA. |
+| CMACUsing_DES3.java | Demonstrate computing CMAC-DES3 signature. |
+| CMACUsing_AES.java | Demonstrate computing CMAC-AES signature. |
+| HMACUsing_SHA1.java | Demonstrates computing HMAC-SHA1 signature. |
+| HMACUsing_SHA256.java | Demonstrates computing HMAC-SHA256 signature. |

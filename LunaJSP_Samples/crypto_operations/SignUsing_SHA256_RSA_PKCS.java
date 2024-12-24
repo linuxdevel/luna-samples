@@ -45,10 +45,17 @@ public class  SignUsing_SHA256_RSA_PKCS {
 		System.out.println("java SignUsing_SHA256_RSA_PKCS myPartition userpin\n");
 	}
 
-	// Adds LunaProvider into java security provider List dynamically.
-	private static void addLunaProvider() {
-		Security.insertProviderAt(new com.safenetinc.luna.provider.LunaProvider(), 3);
-	}
+
+        // Add LunaProvider to security provider list.
+        private static void addLunaProvider() {
+                if(Security.getProvider(PROVIDER)==null) {
+                        Security.insertProviderAt(new com.safenetinc.luna.provider.LunaProvider(), 3);
+                        System.out.println("LunaProvider added to java.security");
+                } else {
+                        System.out.println("LunaProvider found in java.security");
+                }
+        }
+
 
 	// generates rsa-2048 keypair
 	private static void generateKeyPair() throws Exception {
@@ -58,6 +65,7 @@ public class  SignUsing_SHA256_RSA_PKCS {
 		System.out.println("RSA-2048 keypair generated.");
 	}
 
+
 	// signs the plaintext using CKM_RSA_PKCS mechanism.
 	private static void signData() throws Exception {
 		Signature sign = Signature.getInstance("sha256WithRSA", PROVIDER);
@@ -66,6 +74,7 @@ public class  SignUsing_SHA256_RSA_PKCS {
 		signature = sign.sign();
 		System.out.println("Plaintext signed.");
 	}
+
 
 	// verifies the signature.
 	private static void verifyData() throws Exception {

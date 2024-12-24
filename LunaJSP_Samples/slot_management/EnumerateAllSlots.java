@@ -10,9 +10,9 @@
         **********************************************************************************
 
         OBJECTIVE :
-	- This sample enumerates and display a list of all luna slots/partitions.
+	- This sample enumerates and displays a list of all luna slots/partitions.
 	- Only TOKEN-PRESENT slots are enumerated. C_GetSlotList(CK_TRUE,,);
-	- List would include slot number, slot label, serial and firmware version.
+	- List also displays slot number, slot label, serial and firmware version.
 */
 
 

@@ -49,10 +49,17 @@ public class SignUsing_RSA_X9_31 {
 		System.out.println("java SignUsing_RSA_X_509 myPartition userpin\n");
 	}
 
-	// Adds LunaProvider into java security provider List dynamically.
-	private static void addLunaProvider() {
-		Security.insertProviderAt(new com.safenetinc.luna.provider.LunaProvider(), 3);
-	}
+
+        // Add LunaProvider to security provider list.
+        private static void addLunaProvider() {
+                if(Security.getProvider(PROVIDER)==null) {
+                        Security.insertProviderAt(new com.safenetinc.luna.provider.LunaProvider(), 3);
+                        System.out.println("LunaProvider added to java.security");
+                } else {
+                        System.out.println("LunaProvider found in java.security");
+                }
+        }
+
 
 	// generates rsa-2048 keypair
 	private static void generateKeyPair() throws Exception {
@@ -62,12 +69,14 @@ public class SignUsing_RSA_X9_31 {
 		System.out.println("RSA-2048 keypair generated.");
 	}
 
+
 	// computes sha-256 hash of PLAINTEXT.
 	private static void computeHash() throws Exception {
 		MessageDigest digest = MessageDigest.getInstance(HASH_ALGORITHM, PROVIDER);
 		digest.update(PLAINTEXT.getBytes());
 		messageHash = digest.digest();
 	}
+
 
 	// Returns hash-identiers for RSA_X9_31
 	private static byte[] getHashIdentifier() {

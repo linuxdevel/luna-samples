@@ -31,6 +31,7 @@ public class GenerateRSAKeyPair_1 {
 	private static final int KEY_SIZE = 2048;
 	private static final String PROVIDER = "LunaProvider";
 
+
 	// Prints the correct syntax to execute this sample.
 	private static void printUsage() {
 		System.out.println("[ GenerateRSAKeyPair_1 ]\n");
@@ -40,10 +41,17 @@ public class GenerateRSAKeyPair_1 {
 		System.out.println("java GenerateRSAKeyPair_1 myPartition userpin\n");
 	}
 
-	// Adds LunaProvider into java security provider List dynamically.
-	private static void addLunaProvider() {
-		Security.insertProviderAt(new com.safenetinc.luna.provider.LunaProvider(), 3);
-	}
+
+        // Add LunaProvider to security provider list.
+        private static void addLunaProvider() {
+                if(Security.getProvider(PROVIDER)==null) {
+                        Security.insertProviderAt(new com.safenetinc.luna.provider.LunaProvider(), 3);
+                        System.out.println("LunaProvider added to java.security");
+                } else {
+                        System.out.println("LunaProvider found in java.security");
+                }
+        }
+
 
 	// generates rsa-2048 keypair
 	private static void generateKeyPair() throws Exception {
@@ -52,6 +60,7 @@ public class GenerateRSAKeyPair_1 {
 		rsaKeyPair = keyPairGen.generateKeyPair();
 		System.out.println("RSA-2048 keypair generated.");
 	}
+
 
 	public static void main(String args[]) {
 		try {

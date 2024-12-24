@@ -10,38 +10,39 @@
         **********************************************************************************
 
         OBJECTIVE :
-	- This sample demonstrates how to generate an AES-256 key using LunaProvider.
-	- Key generated using this sample persists in the HSM, i.e. Token Object.
-	- This sample uses LunaKey class to store key in a partition.
-
+	- This sample demonstrates how to compute CMAC using a DES-3 key.
+	- Login will use Crypto-Officer password.
+	- To compute CMAC, this sample uses CKM_DES3_CMAC mechanism, which is java security is known as "CmacDES3".
+	- This sample may fail when used on a slot configured to operate in FIPS mode.
 */
 
 
+
 import java.security.Security;
-import javax.crypto.SecretKey;
+import java.security.MessageDigest;
 import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+import javax.crypto.Mac;
 import com.safenetinc.luna.LunaSlotManager;
-import com.safenetinc.luna.provider.key.LunaKey;
 import com.safenetinc.luna.exception.*;
+import com.safenetinc.luna.LunaUtils;
 
-public class PersistAESKeyUsingLunaKey {
 
-	private static LunaSlotManager slotManager = null;
-	private static String slotPassword = null;
+public class CMACUsing_DES3 {
+
 	private static String slotLabel = null;
-	private static SecretKey aesKey = null;
-	private static final int KEY_SIZE = 256;
-	private static final String KEY_LABEL = "LUNA-SAMPLES-LUNAJSP-AES-KEY";
+	private static String slotPassword = null;
+	private static byte[] signature = null;
+	private static SecretKey des3Key = null;
+	private static final String PLAINTEXT = "Hello World, I've been waiting for the chance to see your face.";
 	private static final String PROVIDER = "LunaProvider";
 
-
-	// Prints the correct syntax to execute this sample.
 	private static void printUsage() {
-		System.out.println("[ PersistAESKeyUsingLunaKey ]\n");
+		System.out.println(" [ CMACUsing_DES3 ]\n");
 		System.out.println("Usage-");
-		System.out.println("java PersistAESKeyUsingLunaKey <slot_label> <crypto_officer_password>\n");
+		System.out.println("java CMACUsing_DES3 <slot_label> <crypto_officer_password>\n");
 		System.out.println("Example -");
-		System.out.println("java PersistAESKeyUsingLunaKey myPartition userpin\n");
+		System.out.println("java CMACUsing_DES3 myPartition userpin\n");
 	}
 
 
@@ -56,44 +57,34 @@ public class PersistAESKeyUsingLunaKey {
         }
 
 
-	// generates aes-256 key.
-	private static void generateKey() throws Exception {
-		KeyGenerator keyGen = KeyGenerator.getInstance("AES", PROVIDER);
-		keyGen.init(KEY_SIZE);
-		aesKey = keyGen.generateKey();
-		if(aesKey!=null) {
-			System.out.println("AES key generated.");
-		}
-	}
+        // Generate AES key.
+        private static void generateAESKey() throws Exception {
+                KeyGenerator keyGenerator = KeyGenerator.getInstance("DESede", PROVIDER);
+                des3Key = keyGenerator.generateKey();
+                System.out.println("DES-3 key generated.");
+        }
 
 
-	// Stores aes-key as a token object
-	private static void storeKey() {
-		LunaKey lunaKey = (LunaKey)aesKey;
-		lunaKey.MakePersistent(KEY_LABEL);
-		System.out.println("AES key saved with Label: " + KEY_LABEL + ".");
-	}
+	// To generate MAC.
+	private static void generateCMAC() throws Exception {
+		Mac mac = Mac.getInstance("CmacDES3", PROVIDER);
+		mac.init(des3Key);
+		mac.update(PLAINTEXT.getBytes());
+		signature = mac.doFinal();
+		System.out.println("DES3 CMAC: " + LunaUtils.getHexString(signature, false));
+    	}
 
 	public static void main(String args[]) {
 		try {
 			slotLabel = args[0];
 			slotPassword = args[1];
-			slotManager = LunaSlotManager.getInstance();
-
-			if(slotManager.findSlotFromLabel(slotLabel)!=-1) { // checks if the slot number is correct.
-				addLunaProvider();
-				slotManager.login(slotLabel, slotPassword); // Performs C_Login
-				System.out.println("LOGIN: SUCCESS");
-				generateKey();
-				storeKey();
-			} else {
-				System.out.println("ERROR: Slot with label " + slotLabel + " not found.");
-				System.exit(1);
-			}
-
+			LunaSlotManager.getInstance().login(slotPassword); // Performs C_Login
+			System.out.println("LOGIN: SUCCESS");
+			addLunaProvider();
+			generateAESKey();
+			generateCMAC();
 			LunaSlotManager.getInstance().logout(); // Performs C_Logout
 			System.out.println("LOGOUT: SUCCESS");
-
 		} catch(ArrayIndexOutOfBoundsException aioe) {
 			printUsage();
 			System.exit(1);

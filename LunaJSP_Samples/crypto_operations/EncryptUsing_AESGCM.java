@@ -51,10 +51,15 @@ public class EncryptUsing_AESGCM {
 	}
 
 
-	// Add LunaProvider into security provider list.
-	private static void addLunaProvider() {
-		Security.insertProviderAt(new com.safenetinc.luna.provider.LunaProvider(), 3);
-	}
+        // Add LunaProvider to security provider list.
+        private static void addLunaProvider() {
+                if(Security.getProvider(PROVIDER)==null) {
+                        Security.insertProviderAt(new com.safenetinc.luna.provider.LunaProvider(), 3);
+                        System.out.println("LunaProvider added to java.security");
+                } else {
+                        System.out.println("LunaProvider found in java.security");
+                }
+        }
 
 
 	// Perform C_Login

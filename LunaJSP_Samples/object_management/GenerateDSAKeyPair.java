@@ -41,10 +41,17 @@ public class GenerateDSAKeyPair {
 		System.out.println("java GenerateDSAKeyPair myPartition userpin\n");
 	}
 
-	// Adds LunaProvider into java security provider List dynamically.
-	private static void addLunaProvider() {
-		Security.insertProviderAt(new com.safenetinc.luna.provider.LunaProvider(), 3);
-	}
+
+        // Add LunaProvider to security provider list.
+        private static void addLunaProvider() {
+                if(Security.getProvider(PROVIDER)==null) {
+                        Security.insertProviderAt(new com.safenetinc.luna.provider.LunaProvider(), 3);
+                        System.out.println("LunaProvider added to java.security");
+                } else {
+                        System.out.println("LunaProvider found in java.security");
+                }
+        }
+
 
 	// generates dsa-2048 keypair
 	private static void generateKeyPair() throws Exception {

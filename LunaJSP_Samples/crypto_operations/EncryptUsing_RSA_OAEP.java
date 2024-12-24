@@ -52,10 +52,17 @@ public class EncryptUsing_RSA_OAEP {
 		System.out.println("java EncryptUsing_RSA_OAEP myPartition userpin\n");
 	}
 
-	// Adds LunaProvider into java security provider List dynamically.
-	private static void addLunaProvider() {
-		Security.insertProviderAt(new com.safenetinc.luna.provider.LunaProvider(), 3);
-	}
+
+        // Add LunaProvider to security provider list.
+        private static void addLunaProvider() {
+                if(Security.getProvider(PROVIDER)==null) {
+                        Security.insertProviderAt(new com.safenetinc.luna.provider.LunaProvider(), 3);
+                        System.out.println("LunaProvider added to java.security");
+                } else {
+                        System.out.println("LunaProvider found in java.security");
+                }
+        }
+
 
 	// generates rsa-2048 keypair
 	private static void generateKeyPair() throws Exception {
@@ -65,6 +72,7 @@ public class EncryptUsing_RSA_OAEP {
 		System.out.println("RSA-2048 keypair generated.");
 	}
 
+
 	// encrypts plaintext using CKM_RSA_PKCS mechanism.
 	private static void encryptData() throws Exception {
 		Cipher encrypt = Cipher.getInstance("RSA/None/OAEPPadding", PROVIDER);
@@ -72,6 +80,7 @@ public class EncryptUsing_RSA_OAEP {
 		encryptedData = encrypt.doFinal(PLAINTEXT.getBytes());
 		System.out.println("Plaintext encrypted.");
 	}
+
 
 	// decrypt the cipher text.
 	private static void decryptData() throws Exception {

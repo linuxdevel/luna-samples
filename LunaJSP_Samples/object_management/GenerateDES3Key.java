@@ -28,6 +28,8 @@ public class GeneratingDES3Key {
 	private static String slotPassword = null;
 	private static String slotLabel = null;
 	private static SecretKey des3Key = null;
+	private static final String PROVIDER = "LunaProvider";
+
 
 	// Prints the correct syntax to execute this sample.
 	private static void printUsage() {
@@ -38,10 +40,17 @@ public class GeneratingDES3Key {
 		System.out.println("java GeneratingDES3Key myPartition userpin\n");
 	}
 
-	// Adds LunaProvider into java security provider List dynamically.
-	private static void addLunaProvider() {
-		Security.insertProviderAt(new com.safenetinc.luna.provider.LunaProvider(), 3);
-	}
+
+        // Add LunaProvider to security provider list.
+        private static void addLunaProvider() {
+                if(Security.getProvider(PROVIDER)==null) {
+                        Security.insertProviderAt(new com.safenetinc.luna.provider.LunaProvider(), 3);
+                        System.out.println("LunaProvider added to java.security");
+                } else {
+                        System.out.println("LunaProvider found in java.security");
+                }
+        }
+
 
 	// generates des-3 key.
 	private static void generateKey() throws Exception {

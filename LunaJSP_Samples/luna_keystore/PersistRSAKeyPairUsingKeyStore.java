@@ -11,7 +11,7 @@
 
         OBJECTIVE :
 	- This sample demonstrates how to generate a persistent RSA-2048 key-pair using LunaProvider.
-	- The key-pair generated using this sample will be made persistent using LunaKey class.
+	- The key-pair generated using this sample will be made persistent using KeyStore class as a PrivateKeyEntry.
 
 */
 
@@ -19,40 +19,45 @@
 import java.security.Security;
 import java.security.KeyPairGenerator;
 import java.security.KeyPair;
-import com.safenetinc.luna.LunaSlotManager;
-import com.safenetinc.luna.provider.key.LunaKey;
+import java.security.KeyStore;
+import java.util.Date;
+import java.math.BigInteger;
+import java.io.ByteArrayInputStream;
 import com.safenetinc.luna.exception.*;
+import com.safenetinc.luna.provider.LunaCertificateX509;
 
-public class PersistRSAKeyPairUsingLunaKey {
+public class PersistRSAKeyPairUsingKeyStore {
 
-	private static LunaSlotManager slotManager = null;
 	private static String slotPassword = null;
 	private static String slotLabel = null;
 	private static KeyPair rsaKeyPair = null;
 	private static final int KEY_SIZE = 2048;
+	private static final String KEY_ALIAS = "LUNA-SAMPLE-RSA-KEY-ENTRY";
 	private static final String PROVIDER = "LunaProvider";
-
+	private static KeyStore lunaKeyStore = null;
+	private static LunaCertificateX509 selfSigned = null;
+	private static final long ONE_YEAR = 31556952000L;
 
 	// Prints the correct syntax to execute this sample.
 	private static void printUsage() {
-		System.out.println("[ PersistRSAKeyPairUsingLunaKey ]\n");
+		System.out.println("[ PersistRSAKeyPairUsingKeyStore ]\n");
 		System.out.println("Usage-");
-		System.out.println("java PersistRSAKeyPairUsingLunaKey <slot_label> <crypto_officer_password>\n");
+		System.out.println("java PersistRSAKeyPairUsingKeyStore <slot_label> <crypto_officer_password>\n");
 		System.out.println("Example -");
-		System.out.println("java PersistRSAKeyPairUsingLunaKey myPartition userpin\n");
+		System.out.println("java PersistRSAKeyPairUsingKeyStore myPartition userpin\n");
 	}
 
+	// Adds LunaProvider into java security provider List dynamically.
+	private static void addLunaProvider() {
+		Security.insertProviderAt(new com.safenetinc.luna.provider.LunaProvider(), 3);
+	}
 
-        // Add LunaProvider to security provider list.
-        private static void addLunaProvider() {
-                if(Security.getProvider(PROVIDER)==null) {
-                        Security.insertProviderAt(new com.safenetinc.luna.provider.LunaProvider(), 3);
-                        System.out.println("LunaProvider added to java.security");
-                } else {
-                        System.out.println("LunaProvider found in java.security");
-                }
-        }
-
+	// Loads Luna KeyStore and executes C_Login
+	private static void loadKeyStore() throws Exception {
+		lunaKeyStore = KeyStore.getInstance("Luna");
+		lunaKeyStore.load(new ByteArrayInputStream(("tokenlabel:"+slotLabel).getBytes()), slotPassword.toCharArray());
+		System.out.println("Luna Keystore loaded.");
+	}
 
 	// generates rsa-2048 keypair
 	private static void generateKeyPair() throws Exception {
@@ -62,42 +67,36 @@ public class PersistRSAKeyPairUsingLunaKey {
 		System.out.println("RSA-2048 keypair generated.");
 	}
 
+	// generate self-signed certificate for PrivateKeyEntry
+	private static void generateSelfSignedCertificate() throws Exception {
+		String subject = "CN=luna-samples, O=Thales, OU=Sales Engineering, C=CA";
+		BigInteger serialNumber = BigInteger.valueOf(1123581321L);
+		Date notBefore = new Date();
+		Date notAfter = new Date(notBefore.getTime()+ ONE_YEAR);
+		selfSigned = LunaCertificateX509.SelfSign(rsaKeyPair, subject, serialNumber, notBefore, notAfter);
+
+	}
 
 	// Stores the generated keypair as Token Object
 	private static void storeKeyPair() throws Exception {
-		LunaKey rsaPrivate = (LunaKey)rsaKeyPair.getPrivate();
-		LunaKey rsaPublic = (LunaKey)rsaKeyPair.getPublic();
-		rsaPrivate.MakePersistent("LUNA-SAMPLE-RSA-PRIVATE");
-		rsaPublic.MakePersistent("LUNA-SAMPLE-RSA-PUBLIC");
-		System.out.println("RSA keypair saved in slot " + slotLabel);
+		lunaKeyStore.setKeyEntry(KEY_ALIAS, rsaKeyPair.getPrivate(), null, new java.security.cert.Certificate[]{selfSigned});
+		System.out.println("RSA Private key saved as PrivateKeyEntry in slot : [" + slotLabel + "]");
 	}
-
 
 	public static void main(String args[]) {
 		try {
 			slotLabel = args[0];
 			slotPassword = args[1];
-			slotManager = LunaSlotManager.getInstance();
 
-			if(slotManager.findSlotFromLabel(slotLabel)!=-1) { // checks if the slot number is correct.
-				addLunaProvider();
-				slotManager.login(slotLabel, slotPassword); // Performs C_Login
-				System.out.println("LOGIN: SUCCESS");
-				generateKeyPair();
-				storeKeyPair();
-			} else {
-				System.out.println("ERROR: Slot with label " + slotLabel + " not found.");
-				System.exit(1);
-			}
-
-			LunaSlotManager.getInstance().logout(); // Performs C_Logout
-			System.out.println("LOGOUT: SUCCESS");
+			addLunaProvider();
+			loadKeyStore();
+			generateKeyPair();
+			generateSelfSignedCertificate();
+			storeKeyPair();
 
 		} catch(ArrayIndexOutOfBoundsException aioe) {
 			printUsage();
 			System.exit(1);
-		} catch(LunaException le) {
-			System.out.println("ERROR: "+ le.getMessage());
 		} catch(Exception exception) {
 			System.out.println("ERROR: "+ exception.getMessage());
 		}

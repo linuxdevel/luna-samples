@@ -26,6 +26,7 @@ public class SeedLunaRNG {
 	private static String slotPassword = null;
 	private static String slotLabel = null;
 	private static byte[] randomBytes = null;
+	private static final String PROVIDER = "LunaProvider";
 
 	// Prints the correct syntax to execute this sample.
 	private static void printUsage() {
@@ -36,10 +37,17 @@ public class SeedLunaRNG {
 		System.out.println("java SeedLunaRNG myPartition userpin\n");
 	}
 
-	// Add LunaProvider to java.security
-	private static void addLunaProvider() {
-		Security.addProvider(new com.safenetinc.luna.provider.LunaProvider());
-	}
+
+        // Add LunaProvider to security provider list.
+        private static void addLunaProvider() {
+                if(Security.getProvider(PROVIDER)==null) {
+                        Security.insertProviderAt(new com.safenetinc.luna.provider.LunaProvider(), 3);
+                        System.out.println("LunaProvider added to java.security");
+                } else {
+                        System.out.println("LunaProvider found in java.security");
+                }
+        }
+
 
 	// Generates random number using LunaRNG.
 	private static void generateRandomData() throws Exception {

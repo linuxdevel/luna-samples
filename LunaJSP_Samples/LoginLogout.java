@@ -34,12 +34,11 @@ public class LoginLogout {
 	public static void main(String args[]) {
 		try {
 			slotPassword = args[0];
-			LunaSlotManager.getInstance().login(slotPassword)); // Performs C_Login
+			LunaSlotManager.getInstance().login(slotPassword); // Performs C_Login
 			System.out.println("LOGIN: SUCCESS");
 			LunaSlotManager.getInstance().logout(); // Performs C_Logout
 			System.out.println("LOGOUT: SUCCESS");
 		} catch(ArrayIndexOutOfBoundsException aioe) {
-			System.out.println("\nERROR: Please pass crypto-officer password as an argument.\n");
 			printUsage();
 			System.exit(1);
 		} catch(LunaException le) {

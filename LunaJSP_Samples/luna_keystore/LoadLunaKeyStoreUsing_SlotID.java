@@ -10,29 +10,34 @@
         **********************************************************************************
 
         OBJECTIVE :
-	- This sample demonstrates how to use LunaRNG to generate randomized data.
+	- This sample demonstrates how to load KeyStore of type Luna.
+	- Loading a Luna Keystore is the other way to login to a partition/slot, instead of using LunaSlotManager.
+	- This sample uses slotlabel to login.
+	- There is no logout function in Java KeyStore so LunaProvider is programmed to logout before an application close(finalize).
 */
 
 
-import com.safenetinc.luna.LunaSlotManager;
-import com.safenetinc.luna.LunaUtils;
-import com.safenetinc.luna.exception.*;
-import java.security.*;
+import java.security.Security;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 
-public class GenerateRandomUsingLunaRNG {
+public class LoadLunaKeyStoreUsing_SlotID {
 
+	private static int slotID;
 	private static String slotPassword = null;
-	private static String slotLabel = null;
-	private static byte[] randomBytes = null;
-	private static final String PROVIDER = "LunaProvider";
+
 
 	// Prints the correct syntax to execute this sample.
 	private static void printUsage() {
-		System.out.println(" [ GenerateRandomUsingLunaRNG ]\n");
+		System.out.println(" [ LoadLunaKeyStoreUsing_SlotID ]\n");
 		System.out.println("Usage-");
-		System.out.println("java GenerateRandomUsingLunaRNG <slot_label> <crypto_officer_password>\n");
+		System.out.println("java LoadLunaKeyStoreUsing_SlotID <slot_number> <crypto_officer_password>\n");
 		System.out.println("Example -");
-		System.out.println("java GenerateRandomUsingLunaRNG myPartition userpin\n");
+		System.out.println("java LoadLunaKeyStoreUsing_SlotID 0 userpin\n");
 	}
 
 
@@ -47,37 +52,28 @@ public class GenerateRandomUsingLunaRNG {
         }
 
 
-	// Generates random number using LunaRNG.
-	private static void generateRandomData() throws Exception {
-		SecureRandom rng = SecureRandom.getInstance("LunaRNG", "LunaProvider");
-		randomBytes = new byte[32];
-		rng.nextBytes(randomBytes);
-		System.out.println("32 bytes of random data generated : " + LunaUtils.getHexString(randomBytes, false)); // getHexString(bytes,spacesInOutput)
+	// loads Luna KeyStore (calls C_Login).
+	private static void loadKeyStore() throws IOException, KeyStoreException, NoSuchAlgorithmException, CertificateException {
+		KeyStore lunaKeyStore = KeyStore.getInstance("Luna");
+		lunaKeyStore.load(new ByteArrayInputStream(("slot:"+slotID).getBytes()), slotPassword.toCharArray());
+		System.out.println("Luna KeyStore loaded successfully.");
 	}
 
+
 	public static void main(String args[]) {
-
 		try {
-			slotLabel = args[0];
+			slotID = Integer.parseInt(args[0]);
 			slotPassword = args[1];
-
-			LunaSlotManager.getInstance().login(slotLabel, slotPassword); // Performs C_Login
 			addLunaProvider();
-			System.out.println("LOGIN: SUCCESS");
-
-			generateRandomData();
-
-			LunaSlotManager.getInstance().logout(); // Performs C_Logout
-			System.out.println("LOGOUT: SUCCESS");
-
+			loadKeyStore();
 		} catch(ArrayIndexOutOfBoundsException aioe) {
-			System.out.println("\nERROR: Please pass slot label and crypto-officer password as an argument.\n");
 			printUsage();
 			System.exit(1);
-		} catch(LunaException le) {
-			System.out.println("ERROR: "+ le.getMessage());
+		} catch(NumberFormatException nfe) {
+			printUsage();
+			System.exit(1);
 		} catch(Exception exception) {
-			System.out.println("Error: "+ exception.getMessage());
+			System.out.println("\nERROR: " + exception.getMessage());
 		}
 	}
 }
