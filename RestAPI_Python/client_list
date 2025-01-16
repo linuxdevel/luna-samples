@@ -1,0 +1,70 @@
+#!/usr/bin/env python3
+import sys
+import os
+import requests
+import base64
+import urllib3
+import getpass
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+
+if len(sys.argv) != 3:
+	print ("usage :-")
+	print ("./client_list <HSM_IP_OR_HOST> <appliance_username>")
+	quit()
+else:
+	hostname = sys.argv[1]
+	username = sys.argv[2]
+	password = getpass.getpass(prompt="["+username+"] Password : ")
+	auth = username + ":" + password
+
+
+authString = base64.b64encode(bytes(auth, 'utf-8')).decode("ascii")
+url = "https://"+hostname+":8443/api/lunasa/ntls/clients"
+header = {'Content-type': 'application/vnd.safenetinc.lunasa+json;version=', 'Authorization': 'Basic %s' % authString}
+response = "No Response received."
+
+
+print ("Connecting to Luna HSM : [",hostname,"]\n")
+try:
+	response = requests.get(url, headers=header, verify=False)
+except OSError as osErr:
+	print("\tFailed to connect to :"+hostname)
+	print("\tReason: ", osErr)
+	quit()
+
+if response.status_code==401:
+	print("Login failed.")
+	quit()
+
+if response.status_code!=200:
+	print ("Command failed, Response code: ", response.status_code)
+	quit()
+else:
+	data = response.json()
+	print("[CLIENT NAME] \t\t\t[HOSTNAME] \t\t\t[IP ADDRESS] \t\t\t[PARTITIONS]")
+	for all_clients in data['clients']:
+		url = "https://"+hostname+":8443/api/lunasa/ntls/clients/"+all_clients['clientID']
+		response = requests.get(url, headers=header, verify=False)
+		clientInfo = response.json()
+		clientId = clientInfo['clientID']
+		clientHostname = clientInfo['hostname']
+		clientIp = clientInfo['ip']
+		parAssigned = "YES"
+
+		if len(clientInfo['hostname'])==0:
+			clientHostname = "--NONE--"
+
+		if len(clientInfo['ip'])==0:
+			clientIp = "--NONE--"
+
+		url = "https://"+hostname+":8443"+clientInfo['links']
+		response = requests.get(url, headers=header, verify=False)
+		linkInfo = response.json()
+		link = linkInfo['links']
+		if len(link) == 0:
+			parAssigned = "NONE"
+		else:
+			num = len(link)
+			parAssigned = "{} assigned."
+			print (clientId, "\t\t\t", clientHostname, "\t\t\t", clientIp, "\t\t\t", parAssigned.format(num), sep='')

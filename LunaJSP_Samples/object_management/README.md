@@ -3,6 +3,7 @@
 
 | **FILE_NAME** | **DESCRIPTION** |
 | --- | --- |
+| DisplayAttributes.java | Demonstrates how to view attributes of an object. |
 | GenerateDES3Key.java | Generate des-3 key using LunaProvider. |
 | GenerateAESKey.java | Generate aes-256 key using LunaProvider. |
 | PersistAESKeyUsingLunaKey.java | Generates aes-256 key and persist it to a partition using LunaKey. |
@@ -12,6 +13,8 @@
 | PersistRSAKeyPairUsingLunaKey.java | Generates rsa-2048 keypair and persist it to a partition using LunaKey. |
 | GenerateECDSAKeyPair.java | Generates ecdsa keypair using LunaProvider.|
 | PersistECDSAKeyPairUsingLunaKey.java | Generates ECDSA keypair and persist it using LunaKey. |
+| RetrieveSecretKeyUsingLunaKey.java | Demonstrates how to retrieve a secret key using LunaKey class. |
+| RetrievePrivateKeyUsingLunaKey.java | Demonstrates how to retrieve a Private key using LunaKey class. |
 | WrapUnwrapSecretKeyUsing_DES3_CBC_PAD | Demonstrates how to wrap/unwrap a secret key using CKM_DES3_CBC_PAD mechanism. |
 | WrapUnwrapSecretKeyUsing_AES_CBC_PAD.java | Demonstrates how to wrap/unwrap a secret key using CKM_AES_CBC_PAD mechanism. |
 | WrapUnwrapPrivateKeyUsing_AES_KWP.java | Demonstrates how to wrap/unwrap a Private Key using CKM_AES_KWP mechanism. |
