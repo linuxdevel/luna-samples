@@ -2,12 +2,17 @@
 
 | SAMPLE NAME | DESCRIPTION |
 | --- | --- |
-| client_list | lists of all registered clients |
+| client_list | displays a list of all registered clients |
 | client_show | displays information about a client. |
 | client_delete | deletes a registered client. |
 | partition_list | lists all partitions in a Luna Network HSM |
-| partition_create | creates a partition. |
-| partition_delete | deletes a partition. |
+| partition_create | demonstrates how to create a partition. |
+| partition_delete | demonstrates how to delete a partition. |
+| certificate_based_authentication | demonstrates certificate based authentication using Luna RestAPI. |
+| user_create | demonstrates how to create a user. |
+| user_delete | demonstrates how to delete a user. |
+| user_list | displays a list of all users in a Luna Network HSM. |
+| user_set_certificate | demonstrates how to set a certificate to a user. |
 
 
 <BR><BR>

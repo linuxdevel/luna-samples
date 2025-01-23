@@ -13,10 +13,13 @@
 
 
 # OBJECTIVE :
-# - This code demonstrates how to read information about a client using Luna REST-API.
+# - This code demonstrates how to delete a user account from a Luna Network HSM.
+
+
 
 
 import sys
+import os
 import requests
 import base64
 import urllib3
@@ -24,63 +27,48 @@ import getpass
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
-if len(sys.argv) !=4:
+
+# Prints the correct syntax to execute this code.
+if len(sys.argv) != 3:
 	print ("\nusage :-")
-	print ("./client_show <HSM_IP_OR_HOSTNAME> <appliance_username> <clientName>\n")
+	print ("./user_delete <HSM_IP_OR_HOST> <appliance_username>\n")
 	quit()
 else:
 	hostname = sys.argv[1]
 	username = sys.argv[2]
-	password = getpass.getpass(prompt="["+username+"] Password : ")
+	password = getpass.getpass(prompt="["+ username + "] Password : ")
 	auth = username + ":" + password
-	clientName = sys.argv[3]
 
 authString = base64.b64encode(bytes(auth, 'utf-8')).decode("ascii")
-url = "https://"+hostname+":8443/api/lunasa/ntls/clients/"+clientName
 header = {'Content-type': 'application/vnd.safenetinc.lunasa+json;version=', 'Authorization': 'Basic %s' % authString}
-response = "No Response received."
+response = 0
 
 
 
-
-print ("Connecting to Luna HSM: [",hostname, "]\n")
+# Ask for the username to delete and confirmation before deleting it.
 try:
-	response = requests.get(url, headers=header, verify=False)
+	user_name = input("\nUSER-ID : ")
+	confirmation = input("Are you sure you want to delete this user? Type 'delete-this-user' to confirm : ")
+	if (confirmation=='delete-this-user'):
+		url = "https://"+hostname+":8443/users/"+user_name
+		response = requests.delete(url, headers=header, verify=False)
+	else:
+		print ("\nNo changes were made, exiting now...")
+		quit()
+
 except OSError as osErr:
-	print("\tFailed to connect to :", hostname)
+	print("\tFailed to connect to :"+hostname)
 	print("\tReason: ", osErr)
-	quit();
+	quit()
 
 if response.status_code==401:
-        print("Login failed.")
-        quit()
-if response.status_code!=200:
-        print ("Command failed, Response code: ", response.status_code)
-        quit()
+	print("Login failed.")
+	quit()
 
+if response.status_code!=204:
+	print("Response code :",response.status_code)
+	quit()
+else:
+	print ("\nUsername:", user_name, "deleted successfully.")
 
-
-
-if response.status_code==200:
-	data = response.json()
-	print ("Client Name	:", data['clientID'])
-	if data['hostname']=='':
-		print ("Hostname 	: NOT SET")
-	else:
-		print ("Hostname 	:", data['hostname'])
-
-	print ("IP Address 	: ", end='')
-	if data['ip']=='':
-		print ("NOT SET")
-	else:
-		print (data['ip'])
-
-	print ("Partitions")
-	url = "https://"+hostname+":8443"+data['links']
-	response = requests.get(url, headers=header, verify=False)
-	data = response.json()
-	if len(data['links']) > 0:
-		for links in data['links']:
-			print("  -", links['id'])
-	else:
-		print("\tNone Assigned.")
+print ()
